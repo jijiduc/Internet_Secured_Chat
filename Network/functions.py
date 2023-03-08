@@ -1,14 +1,25 @@
 """""
-Contient les fonctions d'encodages et décodages du protocole du server
+Contient les fonctions d'encodage et décodage du protocole du server
 """""
-def encode() : # pour l'instant on envoie du texte par défaut
-    message = "petit pain d'épices" #input('Your message :\n')
-    header = b'ISCt'
-    size = len(message.encode()).to_bytes(2,"big")
-    data = bytearray()
-    data.extend(header)
-    data.extend(size)
-    for i in message :
-        data.extend(bytes(4-len(bytes(i.encode()))) + bytes(i.encode()))
+
+
+def encode(message, type):  # fonction encodage de message
+    data = b'ISC'
+    data += type.encode()
+    data += len(message).to_bytes(2, "big")
+    for i in message:
+        data += (bytes(4 - len(bytes(i.encode()))) + bytes(i.encode()))
     return data
 
+
+def decode(message):  # fonction de décodage d'un message
+    data = ""
+    décodable = message[6:len(message)]
+    info = [décodable[i:i + 4] for i in range(0, len(décodable), 4)]
+    for i in info:
+        byte = b''
+        for j in i:
+            if j != 0 or byte != b'':
+                byte += j.to_bytes(1, 'big')
+        data += byte.decode()
+    return data
