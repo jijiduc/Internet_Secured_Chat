@@ -6,6 +6,6 @@ from UI.window import *
 from Encryption.method import *
 
 text = "Bonjour, ceci est un test de la méthode de shifting"
-shiftedText = Encryption.method.shift(text, 4)
+shiftedText = Encryption.method.shift(text,10)
 print(text)
 print(shiftedText)

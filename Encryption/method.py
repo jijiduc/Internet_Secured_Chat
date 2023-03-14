@@ -1,9 +1,12 @@
 """""
-Contient les méthodes de cryptages
+Contient les méthodes de cryptage et de décryptage
 """""
 
 def shift(text, shift):
-    a = ord('a')
-    return ''.join(
-        chr((ord(char) - a + shift) % 26 + a) if 'a' <= char <= 'z' else char
-        for char in text.lower())
+    crypted = ""
+    for i in text :
+        crypted += chr(ord(i) + shift)
+    return crypted
+
+def unshift(text):
+    return text
