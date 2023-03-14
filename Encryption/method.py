@@ -9,4 +9,10 @@ def shift(text, shift):
     return crypted
 
 def unshift(text):
+    number = 0
+    letter = ''
+    for i in range(128):
+        for i in text:
+            lol = ""
+
     return text
