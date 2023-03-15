@@ -1,12 +1,11 @@
 """""
 Contient les méthodes de cryptage et de décryptage
 """""
-
 def shift(text, shift):
-    crypted = ""
+    data = 0
     for i in text :
-        crypted += chr(ord(i) + shift)
-    return crypted
+        data += i + shift
+    return data
 
 def unshift(text):
     number = 0
