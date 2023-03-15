@@ -134,7 +134,7 @@ class Ui_Dialog(object):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.TIMERE)
-        self.timer.start(2500)
+        self.timer.start(250)
 
         self.retranslateUi(Dialog)
         self.cbCrypSend.setCurrentIndex(0)
