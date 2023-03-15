@@ -128,7 +128,7 @@ class Ui_Dialog(object):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.TIMERE)
-        self.timer.start(2500)
+        self.timer.start(250)
 
         self.retranslateUi(Dialog)
         self.cbCrypSend.setCurrentIndex(0)
@@ -153,10 +153,11 @@ class Ui_Dialog(object):
         self.lblT_3.setText(_translate("Dialog", "Messages décryptés"))
 
     def CLICKEZ(self):
-        GROSSEDATA = self.leSend.text()
-        self.pteDialogue.insertPlainText(f"utilisateur: {GROSSEDATA}\n")
+        GROSSEDATA = (self.leSend.text())
+        self.pteDialogue.insertPlainText(f"Utilisateur : {GROSSEDATA}\n")
+        GROSSEDATA = Network.functions.encode(GROSSEDATA,"t")
         self.leSend.setText("")
-        #self.envoi(GROSSEDATA)
+        tcp_client.sendall(GROSSEDATA)
 
     def DecryptAll(self):
         self.btnDecrypt.setEnabled(not self.cbEveryDec.isChecked())
@@ -164,9 +165,15 @@ class Ui_Dialog(object):
         decrypTout = self.cbEveryDec.isChecked()
 
     def TIMERE(self):
-        #self.pteDialogue.insertPlainText("AH")
-        received = tcp_client.recv(1024)
-        self.pteDialogue.insertPlainText("Message reçu : " + Network.functions.decode(received) + "\n")
+        LESTACK = bytes()
+        try:
+            while True:
+                LESTACK += tcp_client.recv()
+
+        except ValueError:
+            print("G FINI CHEF")
+            self.pteDialogue.insertPlainText(f"Serveur : {Network.functions.decode(LESTACK)}\n")
+            LESTACK = 0
 
 if __name__ == "__main__":
     import sys
@@ -185,8 +192,7 @@ if __name__ == "__main__":
     # try:
     # Establish connection to TCP server and exchange data
     tcp_client.connect((host_ip, server_port))
-    #tcp_client.sendall(data)
-    #print("Message envoyé:     {}".format(data))
+
 
 
 
