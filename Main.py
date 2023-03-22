@@ -175,15 +175,18 @@ class Ui_Dialog(object):
                 print(myStack)
 
         except Exception as e:
-            if e.args[0] == BlockingIOError:
-                if len(myStack) != 0:
-                    print("msg get")
-                    if myStack[3] == ord('t'):
-                        print("txt")
-                        self.pteDialogue.insertPlainText(f"Serveur: {self.byteToString(myStack)}\n")
-                    if myStack[3] == ord('i'):
-                        print("img")
-                        self.byteToImage(myStack)
+            if len(myStack) != 0:
+                print("msg get")
+                if(myStack[3] == ord('t')):
+                    self.pteDialogue.insertPlainText(
+                        f"Serveur: {Network.functions.int_array_to_string(Network.functions.decode_to_int(myStack))}\n")
+                    print(f"Serveur: {Network.functions.int_array_to_string(Network.functions.decode_to_int(myStack))}\n")
+                #if myStack[3] == ord('t'):
+                    #print("txt")
+                    #self.pteDialogue.insertPlainText(f"Serveur: {self.byteToString(myStack)}\n")
+                #if myStack[3] == ord('i'):
+                    #print("img")
+                    #self.byteToImage(myStack)
             pass
 
 if __name__ == "__main__":
