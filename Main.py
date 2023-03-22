@@ -1,3 +1,5 @@
+import errno
+
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer
 import socket
@@ -165,18 +167,31 @@ class Ui_Dialog(object):
         decrypTout = self.cbEveryDec.isChecked()
 
     def TIMERE(self):
-        LESTACK = bytes()
         try:
+            myStack = bytes()
             while True:
-                LESTACK += tcp_client.recv()
+                myStack += tcp_client.recv(1024)
+                print("Stack contains:")
+                print(myStack)
 
-        except ValueError:
-            print("G FINI CHEF")
-            self.pteDialogue.insertPlainText(f"Serveur : {Network.functions.decode(LESTACK)}\n")
-            LESTACK = 0
+        except Exception as e:
+            if e.args[0] == BlockingIOError:
+                if len(myStack) != 0:
+                    print("msg get")
+                    if myStack[3] == ord('t'):
+                        print("txt")
+                        self.pteDialogue.insertPlainText(f"Serveur: {self.byteToString(myStack)}\n")
+                    if myStack[3] == ord('i'):
+                        print("img")
+                        self.byteToImage(myStack)
+            pass
 
 if __name__ == "__main__":
     import sys
+    def except_hook(cls, exception, traceback):
+        sys.__excepthook__(cls, exception, traceback)
+    sys.excepthook = except_hook
+
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
     ui = Ui_Dialog()
@@ -192,10 +207,7 @@ if __name__ == "__main__":
     # try:
     # Establish connection to TCP server and exchange data
     tcp_client.connect((host_ip, server_port))
-
-
-
-
+    tcp_client.setblocking(False)
 
     sys.exit(app.exec())
 
