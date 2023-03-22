@@ -29,3 +29,12 @@ def int_array_to_string(int_array):  # transform an array of int into a string
     for i in int_array:
         string_data += str(i)
     return string_data
+
+
+def string_to_int_array(string_data):  # transform a string text into an array of int
+    int_array = numpy.full((1, len(string_data)), numpy.inf)
+    indices = 0
+    for i in string_data:
+        int_array[indices] = int(i)
+        indices += 1
+    return int_array
