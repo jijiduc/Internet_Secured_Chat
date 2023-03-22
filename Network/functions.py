@@ -15,19 +15,17 @@ def encode(message, category):  # encode a str text to the server's protocol
 
 def decode_to_int(message):  # transform server's message into an array of int
     data = message[6:len(message)]
-    int_array = numpy.full((1, len(data)), numpy.inf)
-    indices = 0
+    int_array = []
     four_byte = [data[i:i + 4] for i in range(0, len(data), 4)]
     for i in four_byte:
-        int_array[indices] = int.from_bytes(i, 'big')
-        indices += 1
+        int_array.append(int.from_bytes(i, 'big'))
     return int_array
 
 
 def int_array_to_string(int_array):  # transform an array of int into a string
     string_data = ""
     for i in int_array:
-        string_data += str(i)
+        string_data += chr(i)
     return string_data
 
 
@@ -35,6 +33,6 @@ def string_to_int_array(string_data):  # transform a string text into an array o
     int_array = numpy.full((1, len(string_data)), numpy.inf)
     indices = 0
     for i in string_data:
-        int_array[indices] = int(i)
+        int_array[indices] = int(i.encode())
         indices += 1
     return int_array
