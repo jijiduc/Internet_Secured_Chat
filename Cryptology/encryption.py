@@ -3,8 +3,9 @@ Contains some encrypting method
 """""
 
 
-def caesar(text, number):  # encrypting method : caesar cypher
-    data = 0
-    for i in text.encode():
-        data += i + number
-    return data
+def caesar(int_array, number):  # using caesar cypher concept
+    for i in range(0, len(int_array)):
+        int_array[i] = int_array[i] + number
+
+    return int_array
+
