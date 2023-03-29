@@ -27,12 +27,12 @@ def int_array_to_string(int_array):  # transform an array of int into a string
         string_data += chr(i)
     return string_data
 
-
+# i.to_bytes(2, 'big').decode('utf-8')
 def string_to_int_array(text):  # transform a string text, from each char into an array of int
     int_array = [0 for _ in range(len(text))]
     indices = 0
     for i in text:
-        int_array[indices] = int.from_bytes(i.encode('utf-8'),'big')
+        int_array[indices] = ord(i)
         indices += 1
-
+# int.from_bytes(i.encode('utf-8'), 'big')
     return int_array

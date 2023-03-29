@@ -9,3 +9,6 @@ def caesar(int_array, number):  # using caesar cypher concept
 
     return int_array
 
+
+def vigenere(int_array, word):  # using vigener cypher
+    return int_array
