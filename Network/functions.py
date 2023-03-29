@@ -1,7 +1,6 @@
 """""
 Contains the server's encoding/decoding functions
 """""
-import numpy
 
 
 def encode(message, category):  # encode a str text to the server's protocol
@@ -30,7 +29,7 @@ def int_array_to_string(int_array):  # transform an array of int into a string
 
 
 def string_to_int_array(string_data):  # transform a string text into an array of int
-    int_array = numpy.full((1, len(string_data)), numpy.inf)
+    int_array = []
     indices = 0
     for i in string_data:
         int_array[indices] = int(i.encode())
