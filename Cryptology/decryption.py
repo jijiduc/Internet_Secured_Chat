@@ -5,7 +5,7 @@ import string
 import ressources
 
 
-def cesar_with_key(int_array, key):
+def cesar_decode(int_array, key):
     for i in range(0, len(int_array)):
         int_array[i] = int_array[i] - key
 

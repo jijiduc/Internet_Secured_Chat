@@ -1,5 +1,5 @@
 """""
-Contains some encrypting method
+Contains some encrypting methods
 """""
 
 
@@ -10,22 +10,11 @@ def caesar(int_array, number):  # using caesar cypher concept
     return int_array
 
 
-def vigenere_cipher(key, message):
-    """
-    Encrypts the given message using Vigenere cipher with the given key represented as a list of integers.
-
-    Parameters:
-    key (list of int): The key to use for encryption.
-    message (list of int): The message to encrypt.
-
-    Returns:
-    list of int: The encrypted message.
-    """
-    encrypted_message = []
-    key_len = len(key)
-    for i, char in enumerate(message):
-        key_index = i % key_len
-        key_value = key[key_index]
-        encrypted_char = (char + key_value) % 256
-        encrypted_message.append(encrypted_char)
-    return encrypted_message
+def vigenere(int_array, key):
+    for i, val in enumerate(int_array):
+        # print("index de la liste : " + str(i))
+        # print(" index de la clef : " + str(i % len(key)))
+        key_value = key[i % len(key)]
+        # print("valeur de la clef : " + str(key_value))
+        int_array[i] = int_array[i] + key_value
+    return int_array
