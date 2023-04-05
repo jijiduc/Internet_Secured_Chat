@@ -8,9 +8,13 @@ import ressources
 def cesar_decode(int_array, key):
     for i in range(0, len(int_array)):
         int_array[i] = int_array[i] - key
-
     return int_array
 
+def vigenere_decode(int_array, key):
+    for i, val in enumerate(int_array):
+        key_value = key[i % len(key)]
+        int_array[i] = int_array[i] - key_value
+    return int_array
 
 
 
