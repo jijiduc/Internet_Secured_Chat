@@ -10,6 +10,7 @@ def cesar_decode(int_array, key):
         int_array[i] = int_array[i] - key
     return int_array
 
+
 def vigenere_decode(int_array, key):
     for i, val in enumerate(int_array):
         key_value = key[i % len(key)]
@@ -17,38 +18,53 @@ def vigenere_decode(int_array, key):
     return int_array
 
 
+def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
 
+    # calculation of each element frequency
+    frequencyDict = dict()
+    visited = set()
+    listLength = len(int_array)
+    for i in range(listLength):
+        if int_array[i] in visited:
+            continue
+        else:
+            count = 0
+            element = int_array[i]
+            visited.add(int_array[i])
+            for j in range(listLength - i):
+                if int_array[j + i] == element:
+                    count += 1
+            frequencyDict[element] = round(count / len(int_array), 4)
 
+    # print("Input list is:", int_array)
+    # print("Frequency of elements is:")
+    # print(frequencyDict)
+    # print(ord('e'))
 
+    def get_value(k): # donne la valeur d'un dictionnaire à partir d'une clef
+        for clef, valeur in ressources.letterFrequency.items():
+            if k == clef:
+                return valeur
 
+        return "There is no such Key"
 
-def cracking_cesar(text):  # decrypting method : caesar cypher
-    text = text.lower()
+    # Key finding process
+    difference = 0
+    difference_maximum = 1
+    good_pick = 0
+    the_key = 0
+    for key, value in frequencyDict.items():
+        difference = abs(get_value('e') - value)
+        if difference < difference_maximum:
+            difference_maximum = difference
+            good_pick = key
 
-    # calculation of each letter frequency
-    freq = {}
-    for letter in string.ascii_lowercase:
-        freq[letter] = text.count(letter) / len(text)
-
-    #  Key finding process
-    min_diff = float('inf')
-    best_key = 0
-    for key in range(26):
-        diff = 0
-        for letter in ressources.letterFrequency:
-            shifted_letter = chr((ord(letter) - 65 + key) % 26 + 65)
-            diff += abs(freq.get(shifted_letter, 0) - ressources.letterFrequency[letter])
-        if diff < min_diff:
-            min_diff = diff
-            best_key = key
+    # print(good_pick)
+    the_key = good_pick - 101
+    # print("clef final : ")
+    # print(the_key)
 
     # Decrypting the text with the found key
-    result = ""
-    for letter in text:
-        if letter in string.ascii_uppercase:
-            shifted_letter = chr((ord(letter) - 65 - best_key) % 26 + 65)
-            result += shifted_letter
-        else:
-            result += letter
-
-    return result
+    for i in range(0, len(int_array)):
+        int_array[i] = int_array[i] - the_key
+    return int_array
