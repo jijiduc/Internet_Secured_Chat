@@ -1,256 +1,299 @@
-
+import errno
 
 from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtCore import QTimer
-import socket
-
+from PyQt6.QtCore import QTimer, QMetaObject
 from PyQt6.QtGui import QTextCursor
 
+import socket
 import Network.functions
+import Cryptology.encryption
+import Cryptology.decryption
+from UI.NOUVOTRUCS import NOUVOBOUTHON,NOUVOPLEINTEXTEDITION
+from UI.TextDialogObject import Ui_DialogObject
 
-decrypTout = False
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(1063, 415)
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        Dialog.setFont(font)
-        self.scrollArea = QtWidgets.QScrollArea(parent=Dialog)
-        self.scrollArea.setGeometry(QtCore.QRect(10, 10, 341, 331))
-        self.scrollArea.setMouseTracking(True)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName("scrollArea")
+class Ui_MainWindow(object):
+    indexDialogObjects = 0 #nombre d'elements actuels dans les deux dictionnaires qui suivent
+    dictButtons = {} #dictionnaire contenant les boutons de dialogue (chaque message est representé avec un bouton)
+
+    def setupUi(self, MainWindow): #setup de l'interface graphique je commente pas ca c'est mort
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(800, 545)
+        self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+
+        self.ScrDialog = QtWidgets.QScrollArea(parent=self.centralwidget)
+        self.ScrDialog.setGeometry(QtCore.QRect(10, 10, 351, 481))
+        self.ScrDialog.setWidgetResizable(True)
+        self.ScrDialog.setObjectName("ScrDialog")
+        self.ScrDialog.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 339, 329))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(1, 1, 349, 80))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
 
-        self.pteDialogue = QtWidgets.QPlainTextEdit(parent=self.scrollAreaWidgetContents)
-        self.pteDialogue.setGeometry(QtCore.QRect(0, 20, 341, 311))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.pteDialogue.setFont(font)
-        self.pteDialogue.setReadOnly(True)
-        self.pteDialogue.setObjectName("pteDialogue")
+        self.verticalLayoutWidget = QtWidgets.QWidget(parent=self.scrollAreaWidgetContents)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 351, 481))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setContentsMargins(0, 0, 0, 420)
+        self.ScrDialog.setWidget(self.scrollAreaWidgetContents)
+        #self.verticalLayout.setStretch(100,100)
 
-        self.lblT = QtWidgets.QLabel(parent=self.scrollAreaWidgetContents)
-        self.lblT.setGeometry(QtCore.QRect(0, 0, 341, 21))
+        self.BtnEncrypt = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.BtnEncrypt.setGeometry(QtCore.QRect(380, 360, 191, 31))
+        self.BtnEncrypt.setObjectName("BtnEncrypt")
+
+        self.BtnDecrypt = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.BtnDecrypt.setGeometry(QtCore.QRect(580, 360, 191, 31))
+        self.BtnDecrypt.setObjectName("BtnDecrypt")
+        self.BtnDecrypt.clicked.connect(self.DESCRYPTES)
+
+        self.TabWidParamEncrypt = QtWidgets.QTabWidget(parent=self.centralwidget)
+        self.TabWidParamEncrypt.setGeometry(QtCore.QRect(370, 140, 411, 111))
+        self.TabWidParamEncrypt.setObjectName("TabWidParamEncrypt")
+        self.tab_4 = QtWidgets.QWidget()
+        self.tab_4.setObjectName("tab_4")
+
+        self.LblSansMethode = QtWidgets.QLabel(parent=self.tab_4)
+        self.LblSansMethode.setGeometry(QtCore.QRect(10, 20, 291, 31))
         font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
         font.setPointSize(12)
-        font.setBold(True)
-        self.lblT.setFont(font)
-        self.lblT.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
-        self.lblT.setTextFormat(QtCore.Qt.TextFormat.PlainText)
-        self.lblT.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter|QtCore.Qt.AlignmentFlag.AlignTop)
-        self.lblT.setObjectName("lblT")
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.LblSansMethode.setFont(font)
+        self.LblSansMethode.setObjectName("LblSansMethode")
 
-        self.btnSend = QtWidgets.QPushButton(parent=Dialog)
-        self.btnSend.setGeometry(QtCore.QRect(260, 370, 81, 31))
+        self.TabWidParamEncrypt.addTab(self.tab_4, "")
+        self.tab = QtWidgets.QWidget()
+        self.tab.setObjectName("tab")
+
+        self.PteCleCesar = QtWidgets.QPlainTextEdit(parent=self.tab)
+        self.PteCleCesar.setGeometry(QtCore.QRect(160, 20, 231, 41))
+        self.PteCleCesar.setObjectName("PteCleCesar")
+
+        self.LblCleCesar = QtWidgets.QLabel(parent=self.tab)
+        self.LblCleCesar.setGeometry(QtCore.QRect(10, 30, 141, 21))
         font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.btnSend.setFont(font)
-        self.btnSend.setObjectName("btnSend")
-
-        self.leSend = QtWidgets.QLineEdit(parent=Dialog)
-        self.leSend.setGeometry(QtCore.QRect(20, 350, 321, 21))
-        self.leSend.setObjectName("leSend")
-
-        self.cbCrypSend = QtWidgets.QComboBox(parent=Dialog)
-        self.cbCrypSend.setGeometry(QtCore.QRect(90, 370, 171, 31))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.cbCrypSend.setFont(font)
-        self.cbCrypSend.setObjectName("cbCrypSend")
-        self.cbCrypSend.addItem("")
-        self.cbCrypSend.addItem("")
-        self.cbCrypSend.addItem("")
-        self.cbCrypSend.addItem("")
-
-        self.cbChoice = QtWidgets.QComboBox(parent=Dialog)
-        self.cbChoice.setGeometry(QtCore.QRect(20, 370, 71, 31))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.cbChoice.setFont(font)
-        self.cbChoice.setObjectName("cbChoice")
-        self.cbChoice.addItem("")
-        self.cbChoice.addItem("")
-        self.cbChoice.addItem("")
-
-        self.btnDecrypt = QtWidgets.QPushButton(parent=Dialog)
-        self.btnDecrypt.setGeometry(QtCore.QRect(360, 350, 341, 51))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.btnDecrypt.setFont(font)
-        self.btnDecrypt.setObjectName("btnDecrypt")
-
-        self.cbEveryDec = QtWidgets.QCheckBox(parent=Dialog)
-        self.cbEveryDec.setGeometry(QtCore.QRect(710, 350, 181, 20))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.cbEveryDec.setFont(font)
-        self.cbEveryDec.setObjectName("cbEveryDec")
-
-        self.scrollArea_2 = QtWidgets.QScrollArea(parent=Dialog)
-        self.scrollArea_2.setGeometry(QtCore.QRect(360, 10, 341, 331))
-        self.scrollArea_2.setMouseTracking(True)
-        self.scrollArea_2.setWidgetResizable(True)
-        self.scrollArea_2.setObjectName("scrollArea_2")
-        self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 339, 329))
-        self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
-
-        self.pteChoix = QtWidgets.QPlainTextEdit(parent=self.scrollAreaWidgetContents_2)
-        self.pteChoix.setGeometry(QtCore.QRect(0, 20, 341, 311))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.pteChoix.setFont(font)
-        self.pteChoix.setReadOnly(False)
-        self.pteChoix.setObjectName("pteChoix")
-
-        self.lblT_2 = QtWidgets.QLabel(parent=self.scrollAreaWidgetContents_2)
-        self.lblT_2.setGeometry(QtCore.QRect(0, 0, 341, 21))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
         font.setPointSize(12)
-        font.setBold(True)
-        self.lblT_2.setFont(font)
-        self.lblT_2.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
-        self.lblT_2.setTextFormat(QtCore.Qt.TextFormat.PlainText)
-        self.lblT_2.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter|QtCore.Qt.AlignmentFlag.AlignTop)
-        self.lblT_2.setObjectName("lblT_2")
+        self.LblCleCesar.setFont(font)
+        self.LblCleCesar.setObjectName("LblCleCesar")
+        self.TabWidParamEncrypt.addTab(self.tab, "")
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
 
-        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
-        self.scrollArea_3 = QtWidgets.QScrollArea(parent=Dialog)
-        self.scrollArea_3.setGeometry(QtCore.QRect(710, 10, 341, 331))
-        self.scrollArea_3.setMouseTracking(True)
-        self.scrollArea_3.setWidgetResizable(True)
-        self.scrollArea_3.setObjectName("scrollArea_3")
-        self.scrollAreaWidgetContents_3 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 339, 329))
-        self.scrollAreaWidgetContents_3.setObjectName("scrollAreaWidgetContents_3")
+        self.PteCleVegener = QtWidgets.QPlainTextEdit(parent=self.tab_2)
+        self.PteCleVegener.setGeometry(QtCore.QRect(90, 20, 301, 41))
+        self.PteCleVegener.setObjectName("PteCleVegener")
 
-        self.pteDecrypt = QtWidgets.QPlainTextEdit(parent=self.scrollAreaWidgetContents_3)
-        self.pteDecrypt.setGeometry(QtCore.QRect(0, 20, 341, 311))
+        self.LblCleVegener = QtWidgets.QLabel(parent=self.tab_2)
+        self.LblCleVegener.setGeometry(QtCore.QRect(10, 30, 71, 21))
         font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
-        self.pteDecrypt.setFont(font)
-        self.pteDecrypt.setReadOnly(True)
-        self.pteDecrypt.setObjectName("pteDecrypt")
-
-        self.lblT_3 = QtWidgets.QLabel(parent=self.scrollAreaWidgetContents_3)
-        self.lblT_3.setGeometry(QtCore.QRect(0, 0, 341, 21))
-        font = QtGui.QFont()
-        font.setFamily("Comic Sans MS")
         font.setPointSize(12)
-        font.setBold(True)
-        self.lblT_3.setFont(font)
-        self.lblT_3.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
-        self.lblT_3.setTextFormat(QtCore.Qt.TextFormat.PlainText)
-        self.lblT_3.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter|QtCore.Qt.AlignmentFlag.AlignTop)
-        self.lblT_3.setObjectName("lblT_3")
-        self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_3)
+        self.LblCleVegener.setFont(font)
+        self.LblCleVegener.setObjectName("LblCleVegener")
+
+        self.TabWidParamEncrypt.addTab(self.tab_2, "")
+        self.tab_3 = QtWidgets.QWidget()
+        self.tab_3.setObjectName("tab_3")
+        self.TabWidParamEncrypt.addTab(self.tab_3, "")
+
+        self.PteDecrypted = NOUVOPLEINTEXTEDITION(parent=self.centralwidget)
+        self.PteDecrypted.setGeometry(QtCore.QRect(370, 400, 411, 91))
+        self.PteDecrypted.setObjectName("PteDecrypted")
+
+        self.TeSend = QtWidgets.QTextEdit(parent=self.centralwidget)
+        self.TeSend.setGeometry(QtCore.QRect(370, 10, 411, 71))
+        self.TeSend.setObjectName("TeSend")
+
+        self.BtnSend = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.BtnSend.setGeometry(QtCore.QRect(660, 90, 111, 31))
+        self.BtnSend.setObjectName("BtnSend")
+        self.BtnSend.clicked.connect(self.CLICKEZ)
+
+        self.CbxType = QtWidgets.QComboBox(parent=self.centralwidget)
+        self.CbxType.setGeometry(QtCore.QRect(550, 90, 101, 31))
+        self.CbxType.setObjectName("CbxType")
+        self.CbxType.addItem("")
+        self.CbxType.addItem("")
+        self.CbxType.addItem("")
+
+        self.PteEncrypted = NOUVOPLEINTEXTEDITION(parent=self.centralwidget)
+        self.PteEncrypted.setGeometry(QtCore.QRect(370, 260, 411, 91))
+        self.PteEncrypted.setObjectName("PteEncrypted")
+
+        self.BtnDepotImage = QtWidgets.QPushButton(parent=self.centralwidget)
+        self.BtnDepotImage.setGeometry(QtCore.QRect(380, 90, 161, 31))
+        self.BtnDepotImage.setObjectName("BtnDepotImage")
+        MainWindow.setCentralWidget(self.centralwidget)
+
+        self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+
+        self.statusbar = QtWidgets.QStatusBar(parent=MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.TIMERE)
         self.timer.start(250)
 
-        self.retranslateUi(Dialog)
-        self.cbCrypSend.setCurrentIndex(0)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.retranslateUi(MainWindow)
+        self.TabWidParamEncrypt.setCurrentIndex(0)
+        self.CbxType.setCurrentIndex(0)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        self.cbEveryDec.clicked.connect(self.DecryptAll)
-        self.btnSend.clicked.connect(self.CLICKEZ)
-
-    def retranslateUi(self, Dialog):
+    def retranslateUi(self, MainWindow): #pas sur d'avoir pigé pourquoi il a separé ca du setup
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.BtnEncrypt.setText(_translate("MainWindow", "Encryptage ⬆"))
+        self.BtnDecrypt.setText(_translate("MainWindow", "Decryptage ⬇"))
+        self.LblSansMethode.setText(_translate("MainWindow", "Les messages seront envoyés tel quel."))
+        self.TabWidParamEncrypt.setTabText(self.TabWidParamEncrypt.indexOf(self.tab_4), _translate("MainWindow", "Sans methode"))
+        self.LblCleCesar.setText(_translate("MainWindow", "Clé (nombre entier):"))
+        self.TabWidParamEncrypt.setTabText(self.TabWidParamEncrypt.indexOf(self.tab), _translate("MainWindow", "CEASAR"))
+        self.LblCleVegener.setText(_translate("MainWindow", "Clé (mot):"))
+        self.TabWidParamEncrypt.setTabText(self.TabWidParamEncrypt.indexOf(self.tab_2), _translate("MainWindow", "Vegener"))
+        self.TabWidParamEncrypt.setTabText(self.TabWidParamEncrypt.indexOf(self.tab_3), _translate("MainWindow", "RSA"))
+        self.BtnSend.setText(_translate("MainWindow", "Envoyer"))
 
-        self.lblT.setText(_translate("Dialog", "Dialogue utilisateur / serveur"))
-        self.lblT_2.setText(_translate("Dialog", "Choix messages à décrypter"))
-        self.lblT_3.setText(_translate("Dialog", "Messages décryptés"))
-
-        self.cbChoice.setCurrentText(_translate("Dialog", "texte"))
-        self.cbChoice.setItemText(0, _translate("Dialog", "texte"))
-        self.cbChoice.setItemText(1, _translate("Dialog", "serveur"))
-        self.cbChoice.setItemText(2, _translate("Dialog", "image"))
-
-        self.cbCrypSend.setCurrentText(_translate("Dialog", "sans cryptage"))
-        self.cbCrypSend.setItemText(0, _translate("Dialog", "sans cryptage"))
-        self.cbCrypSend.setItemText(1, _translate("Dialog", "Clé de César"))
-        self.cbCrypSend.setItemText(2, _translate("Dialog", "Vegener"))
-        self.cbCrypSend.setItemText(3, _translate("Dialog", "méthode de cryptage 3"))
-
-
-        self.btnDecrypt.setText(_translate("Dialog", "Decrypter"))
-        self.btnSend.setText(_translate("Dialog", "Envoyer"))
-
-        self.cbEveryDec.setText(_translate("Dialog", "Tout tenter de decrypter"))
+        self.CbxType.setCurrentText(_translate("MainWindow", "Texte"))
+        self.CbxType.setItemText(0, _translate("MainWindow", "Texte"))
+        self.CbxType.setItemText(1, _translate("MainWindow", "Serveur"))
+        self.CbxType.setItemText(2, _translate("MainWindow", "Image"))
+        self.BtnDepotImage.setText(_translate("MainWindow", "Ajouter une image..."))
 
 
-
-    def CLICKEZ(self):
-        GROSSEDATA = (self.leSend.text())
-        term = self.cbCrypSend.currentIndex()
-        print(f"Message sans cryptage: {GROSSEDATA}")
-        match term:
+    def DESCRYPTES(self):
+        message = self.PteEncrypted.messageInt
+        messageDeco = []
+        match self.TabWidParamEncrypt.currentIndex():
             case 1:
-                GROSSEDATA = ... #fonction encodage cesar
-                print(f"Message avec cryptage (Cesar): {GROSSEDATA}")
+                if self.PteCleCesar.toPlainText() == "":
+                    messageDeco = Cryptology.decryption.cryptanalysis_cesar(message)
+                else:
+                    messageDeco = Cryptology.decryption.cesar_decode(message, int(self.PteCleCesar.toPlainText()))
             case 2:
-                GROSSEDATA = ... #fonction encodage vegener
-                print(f"Message avec cryptage (Vegener): {GROSSEDATA}")
-        #self.pteDialogue.moveCursor()
-        #self.pteDialogue.moveCursor(QTextCursor::EndOfBlock)
-        self.pteDialogue.insertPlainText(f"Utilisateur : {GROSSEDATA}\n")
-        type = self.cbChoice.currentText()[0]
+                if self.PteCleVegener.toPlainText() == "":
+                    messageDeco = ... #fonction de cryptanalyse vegener
+                else:
+                    messageDeco = Cryptology.decryption.vigenere_decode(message, self.PteCleVegener.toPlainText())
+            case 3:
+                print("nieh")
+        self.PteDecrypted.clear()
+        self.PteDecrypted.insertPlainText(Network.functions.int_array_to_string(messageDeco))
+
+
+    def ENCRYPTE(self):
+        message = Network.functions.string_to_int_array(self.PteDecrypted.toPlainText())
+        messageEnco = []
+        match self.TabWidParamEncrypt.currentIndex():
+            case 1:
+                messageEnco = Cryptology.encryption.caesar(message, int(self.PteCleCesar.toPlainText()))
+            case 2:
+                messageEnco = Cryptology.encryption.vigenere(message, self.PteCleVegener.toPlainText())
+            case 3:
+                print("pouet")
+        self.PteDecrypted.messageInt = messageEnco
+        self.PteDecrypted.clear()
+        self.PteDecrypted.insertPlainText(Network.functions.int_array_to_string(messageEnco))
+
+    def AddDialogObject(self, typeuh, valeurInt, contenu, prov = 'U'): #fonction pour rajouter un bouton au dialogue
+        match typeuh: #en fonction du type de message 't' (texte), 'i' (image)
+            case 't':
+                def CLICKERCOMPLIQUE(slelf):
+                    message = label.messageInByte
+                    self.PteEncrypted.messageInt = message
+                    self.PteEncrypted.clear()
+                    self.PteEncrypted.insertPlainText(Network.functions.int_array_to_string(message))
+
+
+                #cree et met en forme un bouton
+                label = NOUVOBOUTHON(parent=self.verticalLayoutWidget)
+                label.setGeometry(QtCore.QRect(660, 90, 111, 31))
+                label.setObjectName(f"dialogButton{self.indexDialogObjects}")
+                label.setText(f"{contenu}")
+                label.setMinimumHeight(30)
+                label.clicked.connect(CLICKERCOMPLIQUE)
+                label.messageInByte = valeurInt
+                #le rajoute dans le layout pour qu'il soit affiché dans la zone de gauche du GUI
+                self.verticalLayout.addWidget(label)
+                #augmente la taille du layout a chaque rajout pour des questions d'alignement
+                if self.verticalLayout.getContentsMargins()[3] != 0:
+                    self.verticalLayout.setContentsMargins(0,0,0,self.verticalLayout.getContentsMargins()[3] - 30)
+
+
+    def CLICKEZ(self): #si le bouton d'envoi principal est enclenche
+        GROSSEDATA = self.TeSend.toPlainText()
+        type = self.CbxType.currentText()[0].lower()
+        encroptga = ""
+        cler = ""
+        #cree un bouton de dialogue en fonction de l'index actuel du QTab et modifie GROSSEDATA en fonction du crypt. demandé
+        match self.TabWidParamEncrypt.currentIndex():
+            case 0:
+                encroptga = "Pas de cryptage"
+                self.AddDialogObject(type, 0, f"Utilisateur: {GROSSEDATA} ({encroptga})")
+                GROSSEDATA = Network.functions.string_to_int_array(GROSSEDATA)
+            case 1:
+                encroptga = "Clé de César"
+                cler = int(self.PteCleCesar.toPlainText())
+                self.AddDialogObject(type, 0, f"Utilisateur: {GROSSEDATA} ({encroptga} : {cler})")
+                GROSSEDATA = Network.functions.string_to_int_array(GROSSEDATA)
+                GROSSEDATA = Cryptology.encryption.caesar(GROSSEDATA, cler)
+            case 2:
+                encroptga = "Vegener"
+                cler = self.PteCleVegener.toPlainText()
+                self.AddDialogObject(type, 0, f"Utilisateur: {GROSSEDATA} ({encroptga} : {cler})")
+                GROSSEDATA = Network.functions.string_to_int_array(GROSSEDATA)
+                GROSSEDATA = Cryptology.encryption.vigenere(GROSSEDATA, cler)
+            case 3:
+                encroptga = "RSA"
+
+        #encode le message en bytes pour le transport et l'envoie
+        GROSSEDATA = Network.functions.int_array_to_string(GROSSEDATA)
         GROSSEDATA = Network.functions.encode(GROSSEDATA, type)
-        self.leSend.setText("")
         tcp_client.sendall(GROSSEDATA)
+        #enleve le texte dans la zone d'entrée de texte de l'utilisateur
+        self.TeSend.setText("")
 
-    def DecryptAll(self):
-        self.btnDecrypt.setEnabled(not self.cbEveryDec.isChecked())
-        self.pteChoix.setEnabled((not self.cbEveryDec.isChecked()))
-        decrypTout = self.cbEveryDec.isChecked()
-
-    def TIMERE(self):
-        try:
+    def TIMERE(self):  # fonction du QTimer que j'ai piquée a Guillaume et Loic
+        try:  # en gros je crois il attend ici et il ecoute jusqu'a ce qu'il y ait une erreur volontaire
             myStack = bytes()
             while True:
                 myStack += tcp_client.recv(1024)
                 print("Stack contains:")
                 print(myStack)
 
-        except Exception as e:
+        except Exception as e:  # la il detecte l'erreur volontaire qui apparait quand y a plus rien a ecouter
             if len(myStack) != 0:
                 print("msg get")
-                if(myStack[3] == ord('t')):
-                    self.pteDialogue.textCursor().atBlockEnd()
-                    self.pteDialogue.insertPlainText(
-                        f"Serveur: {Network.functions.int_array_to_string(Network.functions.decode_to_int(myStack))}\n")
+                if myStack[3] == ord('t'):  # pis la il vide le stack et il en fait un bouton de dialogue
+                    decodInt = Network.functions.decode_to_int(myStack)
+                    decodStr = Network.functions.int_array_to_string(decodInt)
+                    self.AddDialogObject('t', decodInt, f"Serveur: {decodStr}", 'S')
                     print(f"Serveur: {Network.functions.int_array_to_string(Network.functions.decode_to_int(myStack))}\n")
-                #if myStack[3] == ord('t'):
-                    #print("txt")
-                    #self.pteDialogue.insertPlainText(f"Serveur: {self.byteToString(myStack)}\n")
-                #if myStack[3] == ord('i'):
+                #if myStack[3] == ord('i'):  # la meme mais y a une image dans le bouton
                     #print("img")
                     #self.byteToImage(myStack)
             pass
 
+
 if __name__ == "__main__":
+    #ca c'est un truc que le prof a donné pour avoir du feedback pour les erreurs
     import sys
     def except_hook(cls, exception, traceback):
         sys.__excepthook__(cls, exception, traceback)
     sys.excepthook = except_hook
 
+    #creation de la page GUI
     app = QtWidgets.QApplication(sys.argv)
-    Dialog = QtWidgets.QDialog()
-    ui = Ui_Dialog()
-    ui.setupUi(Dialog)
-    Dialog.show()
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
 
+    #connexion au srerv
     host_ip, server_port = "vlbelintrocrypto.hevs.ch", 6000
     data = Network.functions.encode("bonjour c'est les gars du fond", 't')
 
