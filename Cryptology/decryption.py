@@ -1,6 +1,7 @@
 """""
 Contains some decrypting methods
 """""
+import Network.functions
 import Cryptology.ressources
 
 
@@ -25,7 +26,7 @@ def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
     listLength = len(int_array)
     for i in range(listLength):
         if int_array[i] in visited:
-            continue
+            pass
         else:
             count = 0
             element = int_array[i]
@@ -67,3 +68,20 @@ def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
     for i in range(0, len(int_array)):
         int_array[i] = int_array[i] - the_key
     return int_array
+
+# def kasiski(int_array): # permet de trouver la longeur de la clef d'un cryptage de vigenere
+
+
+def detect_repetition(int_array):
+    repetitions = []
+    list_d = []     # listes des d values
+    for n in range(2, 10):  # prenons tous les fragments de longueur 2 à 10
+        for i in range(0, len(int_array)-n):
+            fragment_i = int_array[i: i + n]    # selon le fragment de base i jusqu'à n
+            for j in range(i+1, len(int_array)-n):  # pour tous les fragment_j de même taille que le fragment_i
+                fragment_j = int_array[j: j + n]
+                if fragment_j == fragment_i:
+                    list_d.append(j-i)
+    return repetitions
+
+
