@@ -43,7 +43,7 @@ def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
     # print(ord('e'))
 
     def get_value(k): # donne la valeur d'un dictionnaire à partir d'une clef
-        for clef, valeur in Cryptology.ressources.letterFrequency.items():
+        for clef, valeur in ressources.letterFrequency.items():
             if k == clef:
                 return valeur
 
