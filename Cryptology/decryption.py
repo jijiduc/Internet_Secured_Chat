@@ -1,9 +1,8 @@
 """""
 Contains some decrypting methods
 """""
-import string
-import Cryptology.ressources
 import Network.functions
+import Cryptology.ressources
 
 
 def cesar_decode(int_array, key):
@@ -43,7 +42,7 @@ def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
     # print(ord('e'))
 
     def get_value(k): # donne la valeur d'un dictionnaire à partir d'une clef
-        for clef, valeur in ressources.letterFrequency.items():
+        for clef, valeur in Cryptology.ressources.letterFrequency.items():
             if k == clef:
                 return valeur
 
@@ -75,21 +74,14 @@ def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
 
 def detect_repetition(int_array):
     repetitions = []
-    ensemble_de_sous_chaines = []
-    for n in range(0, 100):
-        for i in range(0, len(int_array)-1):
-            sous_chaine = int_array[i: i + n]
-            print(Network.functions.int_array_to_string(sous_chaine))
-            for j in range(i, len(int_array)-1):
-                sous_chaine_de_test = int_array[j: j + n]
-                if sous_chaine_de_test == sous_chaine:
-                    ensemble_de_sous_chaines += sous_chaine_de_test
-
-            if len(ensemble_de_sous_chaines) > len(repetitions):
-                repetitions = ensemble_de_sous_chaines
-                ensemble_de_sous_chaines = []
-
-
+    list_d = []     # listes des d values
+    for n in range(2, 10):  # prenons tous les fragments de longueur 2 à 10
+        for i in range(0, len(int_array)-n):
+            fragment_i = int_array[i: i + n]    # selon le fragment de base i jusqu'à n
+            for j in range(i+1, len(int_array)-n):  # pour tous les fragment_j de même taille que le fragment_i
+                fragment_j = int_array[j: j + n]
+                if fragment_j == fragment_i:
+                    list_d.append(j-i)
     return repetitions
 
 
