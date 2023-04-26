@@ -9,7 +9,6 @@ import Network.functions
 import Cryptology.encryption
 import Cryptology.decryption
 from UI.NOUVOTRUCS import NOUVOBOUTHON,NOUVOPLEINTEXTEDITION
-from UI.TextDialogObject import Ui_DialogObject
 
 
 class Ui_MainWindow(object):
