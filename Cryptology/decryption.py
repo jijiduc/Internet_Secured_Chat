@@ -1,7 +1,7 @@
 """""
 Contains some decrypting methods
 """""
-import Network.functions
+from Network.functions import powerAndModRSA
 import Cryptology.ressources
 
 
@@ -84,4 +84,7 @@ def detect_repetition(int_array):
                     list_d.append(j-i)
     return repetitions
 
-
+def RSADecrypt(int_array, key, modulo):
+    for i in range(0, len(int_array)):
+        int_array[i] = powerAndModRSA(int_array[i], key, modulo)
+    return int_array

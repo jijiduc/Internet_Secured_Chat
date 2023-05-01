@@ -2,6 +2,7 @@
 Contains some encrypting methods
 """""
 import random
+from Network.functions import powerAndModRSA
 
 def caesar(int_array, number):  # using caesar cypher concept
     for i in range(0, len(int_array)):
@@ -43,20 +44,6 @@ def LOOOOOONGEUCLIDE(r, r2):
         v2 = vs - q * v2
     return (r)
 
-def powerAndModRSA(self, val, power, modulo):
-    ap = val
-    powTab = []
-    index = 0
-    out = 1
-    while power > 0:
-        powTab.append(int(power % 2))
-        power = power // 2
-        index += 1
-    for i in powTab:
-        if i != 0:
-            out = (out * ap) % modulo
-        ap = (ap * ap) % modulo
-    return out
 
 def newRSAKey(): #RSA encoding
     p = generatePrimes(1,20000)
@@ -65,12 +52,15 @@ def newRSAKey(): #RSA encoding
     k = (p - 1) * (q - 1)
     e = generatePrimes(1, k)
     d = LOOOOOONGEUCLIDE(e,k)
-
+    out = [e, d]
     print(f"VOILA LES NOUVELLES CLES D'ENCRYPTION CHEF:\n"
           f"PUBLIQUE: ({n}, {e})\n"
           f"PRIVEE: ({n}, {d})")
 
+    return(out)
 
 
-if __name__ == "__main__":
-    newRSAKey()
+def RSAEncrypt(int_array, key, modulo):
+    for i in range(0, len(int_array)):
+        int_array[i] = powerAndModRSA(int_array[i], key, modulo)
+    return int_array

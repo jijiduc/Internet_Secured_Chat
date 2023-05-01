@@ -22,11 +22,13 @@ def decode_to_int(message):  # transform server's message into an array of int
 
 
 def int_array_to_string(int_array):  # transform an array of int into a string
-    string_data = ""
-    for i in int_array:
-        string_data += chr(i)   # i.to_bytes(2, 'big').decode('utf-8')
-    return string_data
-
+    try:
+        string_data = ""
+        for i in int_array:
+            string_data += chr(i)   # i.to_bytes(2, 'big').decode('utf-8')
+        return string_data
+    except:
+        return "[message RSA impossible a representer]"
 
 def string_to_int_array(text):  # transform a string text, from each char into an array of int
     int_array = [0 for _ in range(len(text))]
@@ -35,3 +37,18 @@ def string_to_int_array(text):  # transform a string text, from each char into a
         int_array[indices] = ord(i)    # int.from_bytes(i.encode('utf-8'), 'big')
         indices += 1
     return int_array
+
+def powerAndModRSA(val, power, modulo):
+    ap = val
+    powTab = []
+    index = 0
+    out = 1
+    while power > 0:
+        powTab.append(int(power % 2))
+        power = power // 2
+        index += 1
+    for i in powTab:
+        if i != 0:
+            out = (out * ap) % modulo
+        ap = (ap * ap) % modulo
+    return out

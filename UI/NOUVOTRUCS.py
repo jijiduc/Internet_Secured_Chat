@@ -6,3 +6,6 @@ class NOUVOBOUTHON(QPushButton):
 
 class NOUVOPLEINTEXTEDITION(QPlainTextEdit):
     messageInt = []
+
+class NOUVOPLEINRSAEDITION(QPlainTextEdit):
+    keySets = []

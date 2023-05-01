@@ -4,11 +4,12 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QTimer, QMetaObject
 from PyQt6.QtGui import QTextCursor
 
+import re
 import socket
 import Network.functions
 import Cryptology.encryption
 import Cryptology.decryption
-from UI.NOUVOTRUCS import NOUVOBOUTHON,NOUVOPLEINTEXTEDITION
+from UI.NOUVOTRUCS import NOUVOBOUTHON,NOUVOPLEINTEXTEDITION, NOUVOPLEINRSAEDITION
 
 
 class Ui_MainWindow(object):
@@ -90,10 +91,19 @@ class Ui_MainWindow(object):
         font.setPointSize(12)
         self.LblCleVegener.setFont(font)
         self.LblCleVegener.setObjectName("LblCleVegener")
-
         self.TabWidParamEncrypt.addTab(self.tab_2, "")
+
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
+        self.PteCleRSA = NOUVOPLEINRSAEDITION(parent=self.tab_3)
+        self.PteCleRSA.setGeometry(QtCore.QRect(270, 20, 121, 41))
+        self.PteCleRSA.setObjectName("PteCleRSA")
+        self.LblCleRSA = QtWidgets.QLabel(parent=self.tab_3)
+        self.LblCleRSA.setGeometry(QtCore.QRect(10, 30, 281, 21))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.LblCleRSA.setFont(font)
+        self.LblCleRSA.setObjectName("LblCleRSA")
         self.TabWidParamEncrypt.addTab(self.tab_3, "")
 
         self.PteDecrypted = NOUVOPLEINTEXTEDITION(parent=self.centralwidget)
@@ -155,6 +165,7 @@ class Ui_MainWindow(object):
         self.LblCleVegener.setText(_translate("MainWindow", "Clé (mot):"))
         self.TabWidParamEncrypt.setTabText(self.TabWidParamEncrypt.indexOf(self.tab_2), _translate("MainWindow", "Vegener"))
         self.TabWidParamEncrypt.setTabText(self.TabWidParamEncrypt.indexOf(self.tab_3), _translate("MainWindow", "RSA"))
+        self.LblCleRSA.setText(_translate("MainWindow", "Nombres (modulo, clé) ou [#keySet]:"))
         self.BtnSend.setText(_translate("MainWindow", "Envoyer"))
 
         self.CbxType.setCurrentText(_translate("MainWindow", "Texte"))
@@ -179,7 +190,20 @@ class Ui_MainWindow(object):
                 else:
                     messageDeco = Cryptology.decryption.vigenere_decode(message, self.PteCleVegener.toPlainText())
             case 3:
-                print("nieh")
+                if re.compile("\[ *[0-9]+\ *]").match(self.PteCleRSA.toPlainText()):
+                    cler = int(self.PteCleRSA.toPlainText().strip("[] "))
+                    if cler <= (len(self.PteCleRSA.keySets) - 1):
+                        keySet = self.PteCleRSA.keySets[cler]
+                        messageDeco = Cryptology.decryption.RSADecrypt(message, keySet[1], keySet[0])
+                    else:
+                        print("Set de clés inexistant")
+
+                elif re.compile("[0-9]+\, *[0-9]+").match(self.PteCleRSA.toPlainText()):
+                    cler = int(self.PteCleRSA.toPlainText().split(","))
+                    messageDeco = Cryptology.decryption.RSADecrypt(message, cler[0], cler[1])
+
+                else:
+                    print("Format de clé invalide")
         self.PteDecrypted.clear()
         self.PteDecrypted.insertPlainText(Network.functions.int_array_to_string(messageDeco))
 
@@ -193,34 +217,34 @@ class Ui_MainWindow(object):
             case 2:
                 messageEnco = Cryptology.encryption.vigenere(message, self.PteCleVegener.toPlainText())
             case 3:
-                print("pouet")
+                print("nieh")
+
         self.PteDecrypted.messageInt = messageEnco
         self.PteDecrypted.clear()
         self.PteDecrypted.insertPlainText(Network.functions.int_array_to_string(messageEnco))
 
     def AddDialogObject(self, typeuh, valeurInt, contenu, prov = 'U'): #fonction pour rajouter un bouton au dialogue
-        match typeuh: #en fonction du type de message 't' (texte), 'i' (image)
-            case 't':
-                def CLICKERCOMPLIQUE(slelf):
-                    message = label.messageInByte
-                    self.PteEncrypted.messageInt = message
-                    self.PteEncrypted.clear()
-                    self.PteEncrypted.insertPlainText(Network.functions.int_array_to_string(message))
+        if typeuh == 's' or typeuh == 't':
+            def CLICKERCOMPLIQUE(slelf):
+                message = label.messageInByte
+                self.PteEncrypted.messageInt = message
+                self.PteEncrypted.clear()
+                self.PteEncrypted.insertPlainText(Network.functions.int_array_to_string(message))
 
 
-                #cree et met en forme un bouton
-                label = NOUVOBOUTHON(parent=self.verticalLayoutWidget)
-                label.setGeometry(QtCore.QRect(660, 90, 111, 31))
-                label.setObjectName(f"dialogButton{self.indexDialogObjects}")
-                label.setText(f"{contenu}")
-                label.setMinimumHeight(30)
-                label.clicked.connect(CLICKERCOMPLIQUE)
-                label.messageInByte = valeurInt
-                #le rajoute dans le layout pour qu'il soit affiché dans la zone de gauche du GUI
-                self.verticalLayout.addWidget(label)
-                #augmente la taille du layout a chaque rajout pour des questions d'alignement
-                if self.verticalLayout.getContentsMargins()[3] != 0:
-                    self.verticalLayout.setContentsMargins(0,0,0,self.verticalLayout.getContentsMargins()[3] - 30)
+            #cree et met en forme un bouton
+            label = NOUVOBOUTHON(parent=self.verticalLayoutWidget)
+            label.setGeometry(QtCore.QRect(660, 90, 111, 31))
+            label.setObjectName(f"dialogButton{self.indexDialogObjects}")
+            label.setText(f"{contenu}")
+            label.setMinimumHeight(30)
+            label.clicked.connect(CLICKERCOMPLIQUE)
+            label.messageInByte = valeurInt
+            #le rajoute dans le layout pour qu'il soit affiché dans la zone de gauche du GUI
+            self.verticalLayout.addWidget(label)
+            #augmente la taille du layout a chaque rajout pour des questions d'alignement
+            if self.verticalLayout.getContentsMargins()[3] != 0:
+                self.verticalLayout.setContentsMargins(0,0,0,self.verticalLayout.getContentsMargins()[3] - 30)
 
 
     def CLICKEZ(self): #si le bouton d'envoi principal est enclenche
@@ -248,6 +272,26 @@ class Ui_MainWindow(object):
                 GROSSEDATA = Cryptology.encryption.vigenere(GROSSEDATA, cler)
             case 3:
                 encroptga = "RSA"
+                GROSSEDATA = Network.functions.string_to_int_array(GROSSEDATA)
+                if re.compile("\[ *[0-9]+\ *]").match(self.PteCleRSA.toPlainText()):
+                    cler = int(self.PteCleRSA.toPlainText().strip("[] "))
+                    if cler <= (len(self.PteCleRSA.keySets) - 1):
+                        keySet = self.PteCleRSA.keySets[cler]
+                        GROSSEDATA = Cryptology.decryption.RSADecrypt(GROSSEDATA, keySet[1], keySet[0])
+
+                elif re.compile("[0-9]+\, *[0-9]+").match(self.PteCleRSA.toPlainText()):
+                    cler = int(self.PteCleRSA.toPlainText().split(","))
+                    GROSSEDATA = Cryptology.decryption.RSADecrypt(GROSSEDATA, cler[0], cler[1])
+
+                elif self.PteCleRSA.toPlainText() == "":
+                    self.PteCleRSA.keySets.append(Cryptology.encryption.newRSAKey())
+                    print(
+                        f"ELLES POSSEDENT LE NUMERO #{(len(self.PteCleRSA.keySets) - 1)}, FAUT METTRE \"[CE NUMERO]\" POUR LE REUTILISER.")
+                    keySet = self.PteCleRSA.keySets[(len(self.PteCleRSA.keySets) - 1)]
+                    GROSSEDATA = Cryptology.decryption.RSADecrypt(GROSSEDATA, keySet[1], keySet[0])
+
+                else:
+                    print("Format de clé invalide")
 
         #encode le message en bytes pour le transport et l'envoie
         GROSSEDATA = Network.functions.int_array_to_string(GROSSEDATA)
@@ -272,6 +316,14 @@ class Ui_MainWindow(object):
                     decodStr = Network.functions.int_array_to_string(decodInt)
                     self.AddDialogObject('t', decodInt, f"Serveur: {decodStr}", 'S')
                     print(f"Serveur: {Network.functions.int_array_to_string(Network.functions.decode_to_int(myStack))}\n")
+
+                if myStack[3] == ord('s'):  # pis la il vide le stack et il en fait un bouton de dialogue
+                    decodInt = Network.functions.decode_to_int(myStack)
+                    decodStr = Network.functions.int_array_to_string(decodInt)
+                    self.AddDialogObject('s', decodInt, f"Serveur: {decodStr}", 'S')
+                    print(
+                        f"Serveur: {Network.functions.int_array_to_string(Network.functions.decode_to_int(myStack))}\n")
+
                 #if myStack[3] == ord('i'):  # la meme mais y a une image dans le bouton
                     #print("img")
                     #self.byteToImage(myStack)
