@@ -2,7 +2,11 @@
 Contains some decrypting methods
 """""
 from Network.functions import powerAndModRSA
+import math
+
+import Network.functions
 import Cryptology.ressources
+from math import gcd
 
 
 def cesar_decode(int_array, key):
@@ -84,7 +88,4 @@ def detect_repetition(int_array):
                     list_d.append(j-i)
     return repetitions
 
-def RSADecrypt(int_array, key, modulo):
-    for i in range(0, len(int_array)):
-        int_array[i] = powerAndModRSA(int_array[i], key, modulo)
-    return int_array
+
