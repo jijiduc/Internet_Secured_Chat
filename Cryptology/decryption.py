@@ -62,11 +62,7 @@ def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
         if difference < difference_maximum:
             difference_maximum = difference
             good_pick = key
-
-    # print(good_pick)
     the_key = good_pick - 101
-    # print("clef final : ")
-    # print(the_key)
 
     # Decrypting the text with the found key
     for i in range(0, len(int_array)):
@@ -74,6 +70,12 @@ def cryptanalysis_cesar(int_array):  # cryptanalysis method against shift
     return int_array
 
 def shift_for_char(int_array): # fonction d'analyse fréquentielle retournant le
+    def get_value(k): # donne la valeur d'un dictionnaire à partir d'une clef
+        for clef, valeur in Cryptology.ressources.letterFrequency.items():
+            if k == clef:
+                return valeur
+
+        return "There is no such Key"
     frequencyDict = dict()
     visited = set()
     listLength = len(int_array)
