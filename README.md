@@ -23,3 +23,4 @@ voulue et en utilisant le bouton correspondant. Le message décrpyté sera
 inscrit dans la texte boxe du bas.
 
 Pour lancer le programme, il faut lancer le fichier Main.py.
+Le programme utilise un interpréteur python 3.10.0 et les python packages : PyQt6, gcd, click.
